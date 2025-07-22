@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cronômetro e Timer</title>
+  <style>
+    body {
+      background: #0f0f10;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #6c63ff;
+      margin-bottom: 1rem;
+    }
+
+    #display {
+      font-size: 4rem;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin: 1rem 0 2rem 0;
+    }
+
+    .buttons,
+    #timerControls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
+      background: #6c63ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #6c63ffaa;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background: #5a54e7;
+    }
+
+    input[type="number"],
+    select {
+      width: 80px;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    label {
+      font-size: 1rem;
+    }
+
+    hr {
+      width: 100%;
+      max-width: 400px;
+      border-color: #333;
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+  <button><a href="index.html">VOLTAR</a></button>
+  <h1>⏱️ Cronômetro e Timer</h1>
+
+  <div id="display">00:00:00</div>
+
+  <div class="buttons">
+    <button id="startStopBtn">Iniciar</button>
+    <button id="resetBtn" disabled>Resetar</button>
+  </div>
+
+  <hr>
+
+  <div id="timerControls">
+    <label>Min:</label>
+    <input type="number" id="minutesInput" min="0" value="1" />
+    <label>Seg:</label>
+    <input type="number" id="secondsInput" min="0" max="59" value="0" />
+    <label>Som:</label>
+    <select id="soundSelect">
+      <option value="beep">Beep</option>
+      <option value="bell">Campainha</option>
+      <option value="alarm">Alarme</option>
+    </select>
+    <button id="startTimerBtn">Iniciar Timer</button>
+    <button id="stopTimerBtn" disabled>Parar Timer</button>
+  </div>
+
+  <!-- Áudios -->
+  <audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  <audio id="bellSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
+  <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+
+  <script>
+  const display = document.getElementById('display');
+  const startStopBtn = document.getElementById('startStopBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const minutesInput = document.getElementById('minutesInput');
+  const secondsInput = document.getElementById('secondsInput');
+  const startTimerBtn = document.getElementById('startTimerBtn');
+  const stopTimerBtn = document.getElementById('stopTimerBtn');
+  const soundSelect = document.getElementById('soundSelect');
+
+  const sounds = {
+    beep: document.getElementById('beepSound'),
+    bell: document.getElementById('bellSound'),
+    alarm: document.getElementById('alarmSound')
+  };
+
+  let chronometerInterval = null;
+  let timerInterval = null;
+
+  let running = false;
+  let timerRunning = false;
+
+  let startTime = 0;
+  let elapsed = 0;
+
+  function formatTime(ms) {
+    let totalSeconds = Math.floor(ms / 1000);
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.floor((totalSeconds % 3600) / 60);
+    let seconds = totalSeconds % 60;
+    return [hours, minutes, seconds]
+      .map(v => v.toString().padStart(2, '0'))
+      .join(':');
+  }
+
+  function updateChronometer() {
+    elapsed = Date.now() - startTime;
+    display.textContent = formatTime(elapsed);
+  }
+
+  function stopAllSounds() {
+    for (let key in sounds) {
+      sounds[key].pause();
+      sounds[key].currentTime = 0;
+    }
+  }
+
+  function playSound(type) {
+    stopAllSounds(); // Garante que só um som toque por vez
+    if (sounds[type]) {
+      sounds[type].play();
+    }
+  }
+
+  startStopBtn.addEventListener('click', () => {
+    if (timerRunning) {
+      alert("⚠️ O timer está rodando! Pare ele antes de iniciar o cronômetro.");
+      return;
+    }
+
+    if (!running) {
+      startTime = Date.now() - elapsed;
+      chronometerInterval = setInterval(updateChronometer, 250);
+      running = true;
+      startStopBtn.textContent = 'Pausar';
+      resetBtn.disabled = false;
+    } else {
+      clearInterval(chronometerInterval);
+      running = false;
+      startStopBtn.textContent = 'Continuar';
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    clearInterval(chronometerInterval);
+    clearInterval(timerInterval);
+    stopAllSounds();
+    running = false;
+    timerRunning = false;
+    elapsed = 0;
+    display.textContent = '00:00:00';
+    startStopBtn.textContent = 'Iniciar';
+    resetBtn.disabled = true;
+    stopTimerBtn.disabled = true;
+  });
+
+  startTimerBtn.addEventListener('click', () => {
+    if (running) {
+      alert("⚠️ O cronômetro está rodando! Pare ele antes de iniciar o timer.");
+      return;
+    }
+
+    if (timerInterval) clearInterval(timerInterval);
+    stopAllSounds();
+
+    let minutes = parseInt(minutesInput.value) || 0;
+    let seconds = parseInt(secondsInput.value) || 0;
+
+    if (minutes < 0 || seconds < 0 || seconds > 59) {
+      alert("Digite valores válidos para minutos e segundos.");
+      return;
+    }
+
+    let totalSeconds = minutes * 60 + seconds;
+    if (totalSeconds === 0) {
+      alert("O tempo do timer deve ser maior que zero.");
+      return;
+    }
+
+    display.textContent = formatTime(totalSeconds * 1000);
+    timerRunning = true;
+    stopTimerBtn.disabled = false;
+    resetBtn.disabled = false;
+
+    timerInterval = setInterval(() => {
+      totalSeconds--;
+      display.textContent = formatTime(totalSeconds * 1000);
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        stopTimerBtn.disabled = true;
+        playSound(soundSelect.value);
+        alert("⏰ Timer finalizado!");
+        display.textContent = '00:00:00';
+      }
+    }, 1000);
+  });
+
+  stopTimerBtn.addEventListener('click', () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      display.textContent = '00:00:00';
+      stopAllSounds();
+      stopTimerBtn.disabled = true;
+    }
+  });
+</script>
+
+</body>
+</html>
