@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora - Central Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f0f10;
+      --primary-color: #6c63ff;
+      --accent-color: #00ffd5;
+      --text-color: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0f10, #1a1a1d);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .calculator {
+      background-color: #1f1f22;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 0 10px rgba(0, 255, 213, 0.1);
+      max-width: 360px;
+      width: 100%;
+    }
+
+    .display {
+      background-color: #0f0f10;
+      border: none;
+      color: var(--text-color);
+      font-size: 2rem;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: right;
+      width: 100%;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+    }
+
+    .btn {
+      padding: 1rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #2a2a2d;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-color);
+    }
+
+    .btn.operator {
+      color: var(--accent-color);
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Calculadora</h1>
+
+  <div class="calculator">
+    <input type="text" class="display" id="display" disabled />
+    <div class="buttons">
+      <button class="btn" onclick="append('7')">7</button>
+      <button class="btn" onclick="append('8')">8</button>
+      <button class="btn" onclick="append('9')">9</button>
+      <button class="btn operator" onclick="append('/')">÷</button>
+
+      <button class="btn" onclick="append('4')">4</button>
+      <button class="btn" onclick="append('5')">5</button>
+      <button class="btn" onclick="append('6')">6</button>
+      <button class="btn operator" onclick="append('*')">×</button>
+
+      <button class="btn" onclick="append('1')">1</button>
+      <button class="btn" onclick="append('2')">2</button>
+      <button class="btn" onclick="append('3')">3</button>
+      <button class="btn operator" onclick="append('-')">−</button>
+
+      <button class="btn" onclick="append('0')">0</button>
+      <button class="btn" onclick="append('.')">.</button>
+      <button class="btn" onclick="calculate()">=</button>
+      <button class="btn operator" onclick="append('+')">+</button>
+
+      <button class="btn" onclick="clearDisplay()">C</button>
+      <button class="btn" onclick="backspace()">⌫</button>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 - Criado por Você · Central Inteligente
+  </footer>
+
+  <script>
+  const display = document.getElementById('display');
+
+  function append(value) {
+    display.value += value;
+  }
+
+  function clearDisplay() {
+    display.value = '';
+  }
+
+  function backspace() {
+    display.value = display.value.slice(0, -1);
+  }
+
+  function calculate() {
+    try {
+      display.value = eval(display.value).toString();
+    } catch (e) {
+      display.value = 'Erro';
+    }
+  }
+
+  // ⌨️ Suporte a teclado
+  document.addEventListener('keydown', function (e) {
+    const key = e.key;
+
+    if (/[\d+\-*/.]/.test(key)) {
+      append(key);
+    } else if (key === 'Enter' || key === '=') {
+      e.preventDefault();
+      calculate();
+    } else if (key === 'Backspace') {
+      backspace();
+    } else if (key === 'Delete') {
+      clearDisplay(); // ← Delete limpa o display (como o botão C)
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
